@@ -37,6 +37,11 @@ namespace BTGraph
             {
                 IDevice selectedDevice = (IDevice)lv.SelectedItem;
                 await adapter.ConnectToDeviceAsync(selectedDevice);
+
+                adapter.DeviceConnected += (s, a) =>
+                {
+                    DisplayAlert("Notice", "Connected!", "OK");
+                };
             }
         }
 
