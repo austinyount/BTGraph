@@ -23,56 +23,37 @@ namespace BTGraph
             ble = CrossBluetoothLE.Current;
             adapter = CrossBluetoothLE.Current.Adapter;
             deviceList = new ObservableCollection<IDevice>();
-            //lv.ItemSource = deviceList;
-            Button btnConnectBluetooth = new Button
-            {
-                Text = "No Bluetooth Device Connected",
-                BackgroundColor = Color.Blue,
-                TextColor = Color.White,
-            };
-            ListView lv = new ListView
-            {
-                ItemsSource = deviceList
-            };
-            btnConnectBluetooth.Clicked += OnButtonClicked;
+            lv.ItemsSource = deviceList;
+        }
 
-            Content = new StackLayout
+        private async void lv_ItemSelected(object sender, EventArgs e)
+        {
+            if(lv.SelectedItem == null)
             {
-                VerticalOptions = LayoutOptions.Center,
-                Children =
-                {
-                    btnConnectBluetooth,
-                    lv
-                }
-            };
+                DisplayAlert("Notice", "No Device selected", "OK");
+                return;
+            }
+            else
+            {
+                IDevice selectedDevice = (IDevice)lv.SelectedItem;
+                await adapter.ConnectToDeviceAsync(selectedDevice);
+            }
         }
 
         private async void OnButtonClicked(object sender, EventArgs args)
         {
-//            string deviceName;
             Button button = (Button)sender;
-//            button.Text = $"Connecting...";
-//            NavigationPage newDeviceConnectionPage = new NavigationPage(new ConnectDevicePage());
-//            Navigation.PushAsync(newDeviceConnectionPage);
-//            //Navigation.PushAsync(new NavigationPage(new ConnectDevicePage()));
-//            MessagingCenter.Subscribe<ConnectDevicePage, string>(this, "Device Name", (s, e) =>
- //            {
- //                button.Text = $"Connected to {e}";
- //            });
             deviceList.Clear();
 
             adapter.DeviceDiscovered += (s, a) =>
             {
                 deviceList.Add(a.Device);
             };
-            button.Text = "Scanning...";
             if(!ble.Adapter.IsScanning)
             {
+                button.Text = "Scanning...";
                 await adapter.StartScanningForDevicesAsync();
             }
-            
         }
     };
-
-
 }

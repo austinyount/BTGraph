@@ -2,13 +2,31 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:BTGraph"
-             x:Class="BTGraph.MainPage">
+             x:Class="BTGraph.MainPage" 
+             xmlns:vm="clr-namespace:ViewModels">
+
+    <ContentPage.BindingContext>
+        <vm:MainViewModel></vm:MainViewModel>
+    </ContentPage.BindingContext>
 
     <StackLayout>
         <!-- Place new controls here -->
         <Label Text="Welcome to Xamarin.Forms!" 
-           HorizontalOptions="Center"
-           VerticalOptions="CenterAndExpand" />
+            HorizontalOptions="Center"
+            VerticalOptions="CenterAndExpand" />
+        <Button x:Name="btnConnectBluetooth" Text="Connect To Device" Clicked="OnButtonClicked"/>
+        <ListView x:Name="lv" ItemSelected="lv_ItemSelected" BackgroundColor="Beige">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <StackLayout>
+                            <Label Text="{Binding NativeDevice.Id}"/>
+                            <Label Text="{Binding NativeDevice.Name}"/>
+                        </StackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </StackLayout>
 
 </ContentPage>
