@@ -14,13 +14,13 @@
         <Label Text="Welcome to Xamarin.Forms!" 
             HorizontalOptions="Center"
             VerticalOptions="CenterAndExpand" />
-        <Button x:Name="btnConnectBluetooth" Text="Connect To Device" Clicked="OnButtonClicked"/>
+        <Button x:Name="btnConnectBluetooth" x:FieldModifier="private" Text="Tap to scan for devices" Clicked="OnButtonClicked"/>
         <ListView x:Name="lv" ItemSelected="lv_ItemSelected" BackgroundColor="Beige">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ViewCell>
                         <StackLayout>
-                            <Label Text="{Binding NativeDevice.Id}"/>
+                            <!--<Label Text="{Binding NativeDevice.Id}"/> -->
                             <Label Text="{Binding NativeDevice.Name}"/>
                         </StackLayout>
                     </ViewCell>

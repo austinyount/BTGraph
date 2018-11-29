@@ -1,5 +1,6 @@
 ﻿using Plugin.BLE;
 using Plugin.BLE.Abstractions.Contracts;
+using Plugin.BLE.Abstractions.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,49 +17,82 @@ namespace BTGraph
         IAdapter adapter;
         ObservableCollection<IDevice> deviceList;
         StackLayout availableDevices = new StackLayout();
+        //Button button = btnConnectBluetooth;
 
         public MainPage()
         {
             InitializeComponent();
             ble = CrossBluetoothLE.Current;
             adapter = CrossBluetoothLE.Current.Adapter;
+            var state = ble.State;
             deviceList = new ObservableCollection<IDevice>();
             lv.ItemsSource = deviceList;
+            ble.StateChanged += (s, e) =>
+            {
+                DisplayAlert("Notice", $"Bluetooth: {e.NewState}", "OK");
+            };
+            adapter.ScanTimeoutElapsed += (s, e) =>
+            {
+                DisplayAlert("Notice", "timeout elapsed", "OK");
+                btnConnectBluetooth.Text = "Tap to scan for devices";
+            };
+            adapter.DeviceConnected += (s, a) =>
+            {
+                btnConnectBluetooth.Text = "Tap to scan for devices";
+                DisplayAlert("Notice", "Connected!", "OK");
+            };
+            adapter.DeviceDiscovered += (s, a) =>
+            {
+                deviceList.Add(a.Device);
+            };
         }
 
         private async void lv_ItemSelected(object sender, EventArgs e)
         {
-            if(lv.SelectedItem == null)
+            if (lv.SelectedItem == null)
             {
-                DisplayAlert("Notice", "No Device selected", "OK");
+                await DisplayAlert("Notice", "No Device selected", "OK");
                 return;
             }
             else
             {
                 IDevice selectedDevice = (IDevice)lv.SelectedItem;
-                await adapter.ConnectToDeviceAsync(selectedDevice);
-
-                adapter.DeviceConnected += (s, a) =>
+                try
                 {
-                    DisplayAlert("Notice", "Connected!", "OK");
-                };
+                    await adapter.ConnectToDeviceAsync(selectedDevice);
+                }
+                catch(DeviceConnectionException ex)
+                {
+                    await DisplayAlert("Notice", "Error connecting to device!", "OK");
+                }
+                catch(ArgumentNullException ex)
+                {
+                    await DisplayAlert("Notice", "Selected device is null!", "OK");
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Notice", "Unknown exception!", "OK");
+                }
             }
         }
 
         private async void OnButtonClicked(object sender, EventArgs args)
         {
-            Button button = (Button)sender;
+            //Button button = (Button)sender;
             deviceList.Clear();
 
-            adapter.DeviceDiscovered += (s, a) =>
-            {
-                deviceList.Add(a.Device);
-            };
             if(!ble.Adapter.IsScanning)
             {
-                button.Text = "Scanning...";
+                btnConnectBluetooth.Text = "Scanning... tap to stop";
+                adapter.ScanTimeout = 30000;
                 await adapter.StartScanningForDevicesAsync();
             }
+            else
+            {
+                btnConnectBluetooth.Text = "Tap to scan for devices";
+                await adapter.StopScanningForDevicesAsync();
+            }
+
         }
     };
 }
