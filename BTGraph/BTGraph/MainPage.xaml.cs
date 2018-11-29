@@ -17,6 +17,7 @@ namespace BTGraph
         IAdapter adapter;
         ObservableCollection<IDevice> deviceList;
         StackLayout availableDevices = new StackLayout();
+        IDevice selectedDevice;
         //Button button = btnConnectBluetooth;
 
         public MainPage()
@@ -56,7 +57,7 @@ namespace BTGraph
             }
             else
             {
-                IDevice selectedDevice = (IDevice)lv.SelectedItem;
+                selectedDevice = lv.SelectedItem as IDevice;
                 try
                 {
                     await adapter.ConnectToDeviceAsync(selectedDevice);
